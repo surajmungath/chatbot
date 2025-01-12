@@ -10,7 +10,7 @@ from contextlib import redirect_stdout
 import os
 import random
 
-app = Flask(__name__, template_folder='templates')
+app = Flask(__name__, template_folder='templates', static_folder='static')
 app.secret_key = os.urandom(24)  # for session management
 
 # Game state storage
@@ -36,7 +36,7 @@ def login():
 
 @app.route('/signup')
 def signup():
-    return render_template('sing.html')
+    return render_template('sign.html')  
 
 @app.route('/chat')
 def chat_page():
@@ -377,6 +377,19 @@ def logout():
 def forgot():
     return render_template('forgot.html')
 
+@app.route('/health')
+def health_check():
+    return jsonify({"status": "healthy"}), 200
+
+# Error handlers
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('index.html'), 404
+
+@app.errorhandler(500)
+def internal_server_error(e):
+    return render_template('index.html'), 500
+
 if __name__ == '__main__':
-    app.debug = True
-    app.run(host='0.0.0.0', port=5000)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)
