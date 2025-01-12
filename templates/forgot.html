@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forgot Password</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+            font-family: Arial, sans-serif;
+            color: #fff;
+            overflow: hidden;
+        }
+        .video-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -1;
+        }
+        .forgot-password-container {
+            background: #fff;
+            color: #333;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 400px;
+        }
+        .forgot-password-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .forgot-password-header h1 {
+            margin: 0;
+            font-size: 24px;
+            color: #6a11cb;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+        .form-group input {
+            width: 95%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        .form-group input:focus {
+            border-color: #6a11cb;
+            outline: none;
+            box-shadow: 0 0 5px rgba(106, 17, 203, 0.5);
+            transition: box-shadow 0.3s ease;
+        }
+        .reset-password-btn {
+            width: 100%;
+            padding: 10px;
+            background: #6a11cb;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.3s;
+        }
+        .reset-password-btn:hover {
+            background: #2575fc;
+            transform: translateY(-3px);
+        }
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 12px;
+            color: #aaa;
+        }
+        .footer a {
+            color: #6a11cb;
+            text-decoration: none;
+        }
+        .footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
+    <script>
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBmbUvO3TOqMqLHZ6EehRgmKPv-dWOtZtU",
+            authDomain: "signlog-1b4ab.firebaseapp.com",
+            projectId: "signlog-1b4ab",
+            storageBucket: "signlog-1b4ab.firebasestorage.app",
+            messagingSenderId: "21919134283",
+            appId: "1:21919134283:web:780404d8876972742b53ce",
+            measurementId: "G-D80BS0F05P"
+          };
+        // Initialize Firebase
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+
+        const auth = firebase.auth();
+
+        function sendPasswordResetEmail() {
+            const email = document.getElementById("email").value;
+            auth.sendPasswordResetEmail(email)
+                .then(() => {
+                    alert('Password reset email sent');
+                })
+                .catch((error) => {
+                    alert(error.message);
+                });
+        }
+    </script>
+</head>
+<body>
+    <video class="video-background" autoplay loop muted>
+        <source src="{{ url_for('static', filename='videos/a12.mp4') }}" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+    <div class="forgot-password-container">
+        <div class="forgot-password-header">
+            <h1>Forgot Password</h1>
+            <p>Enter your email to reset your password</p>
+        </div>
+        <form onsubmit="event.preventDefault(); sendPasswordResetEmail();">
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" placeholder="Enter your email" required>
+            </div>
+            <button type="submit" class="reset-password-btn">Reset Password</button>
+        </form>
+        <div class="footer">
+            <p>Remembered your password? <a href="{{ url_for('login') }}">Login</a></p>
+        </div>
+    </div>
+</body>
+</html>

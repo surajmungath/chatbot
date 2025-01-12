@@ -1,0 +1,1549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NAVA Chat</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background-color: #0f1117;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background-color: #1a1c25;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #2a2b32;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: white;
+            font-weight: bold;
+        }
+
+        .nav-items {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .nav-button {
+            background: none;
+            border: none;
+            color: #fff;
+            cursor: pointer;
+            padding: 0.5rem 1rem;
+        }
+
+        /* User Profile Styles */
+        .user-section {
+            position: relative;
+            margin-left: 1rem;
+        }
+
+        .user-button {
+            background: none;
+            border: none;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 4px;
+        }
+
+        .user-button:hover {
+            background-color: #2a2b32;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background-color: #5436DA;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .user-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: #1a1c25;
+            border-radius: 10px;
+            padding: 10px 0;
+            min-width: 200px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+            display: none;
+            z-index: 1000;
+        }
+
+        .user-menu.active {
+            display: block;
+        }
+
+        .user-menu-header {
+            padding: 10px 15px;
+            border-bottom: 1px solid #2a2b32;
+        }
+
+        .user-menu-name {
+            font-weight: bold;
+            color: #fff;
+            margin-bottom: 5px;
+        }
+
+        .user-menu-email {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .user-menu-items {
+            padding: 5px 0;
+        }
+
+        .user-menu-item {
+            padding: 8px 15px;
+            color: #fff;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-menu-item:hover {
+            background: #2a2b32;
+        }
+
+        .user-menu-item i {
+            font-size: 16px;
+            color: #666;
+        }
+
+        /* Profile Modal Styles */
+        .profile-modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #1a1c25;
+            border-radius: 15px;
+            padding: 25px;
+            z-index: 1001;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+
+        .profile-modal h2 {
+            color: #fff;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .profile-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .form-group label {
+            color: #fff;
+            font-size: 14px;
+        }
+
+        .form-group input, .form-group textarea {
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #2a2b32;
+            background: #2a2b32;
+            color: #fff;
+            font-size: 14px;
+        }
+
+        .form-group input:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #5436DA;
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .modal-btn {
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .save-btn {
+            background: #5436DA;
+            color: #fff;
+        }
+
+        .cancel-btn {
+            background: #2a2b32;
+            color: #fff;
+        }
+
+        .modal-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        /* Speaker Icon Styles */
+        .message-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .speaker-icon {
+            cursor: pointer;
+            color: #f0ecec;
+            font-size: 16px;
+            padding: 5px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            opacity: 0.7;
+        }
+
+        .speaker-icon:hover {
+            opacity: 1;
+            background: rgba(84, 54, 218, 0.1);
+            color: #5436DA;
+        }
+
+        .speaker-icon.speaking {
+            color: #5436DA;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        /* Message container update */
+        .message-content {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .message-text {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Update styles for the music button */
+        .music-button {
+            display: inline-flex;
+            align-items: center;
+            background: linear-gradient(45deg, #ff4444, #ff6b6b);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            margin-top: 12px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: none;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 500;
+            box-shadow: 0 4px 15px rgba(255, 68, 68, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .music-button:hover {
+            background: linear-gradient(45deg, #ff6b6b, #ff4444);
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 6px 20px rgba(255, 68, 68, 0.4);
+        }
+
+        .music-button:active {
+            transform: translateY(-1px);
+            box-shadow: 0 3px 10px rgba(255, 68, 68, 0.3);
+        }
+
+        .music-button i {
+            margin-right: 10px;
+            font-size: 18px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        /* Styles for the retry button */
+        .retry-button {
+            display: inline-flex;
+            align-items: center;
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            margin-top: 8px;
+            margin-left: 10px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: none;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 500;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .retry-button:hover {
+            background: linear-gradient(45deg, #45a049, #4CAF50);
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+        }
+
+        .retry-button:active {
+            transform: translateY(-1px);
+            box-shadow: 0 3px 10px rgba(76, 175, 80, 0.3);
+        }
+
+        .retry-button i {
+            margin-right: 10px;
+            font-size: 18px;
+            animation: spin 2s infinite linear;
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .button-container {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        /* Rest of the previous styles remain the same */
+        .chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .message-timestamp {
+            font-size: 0.75rem;
+            color: #fcf8f8;
+            margin-top: 4px;
+            text-align: right;
+        }
+        
+        .chat-messages {
+            flex-grow: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .message-container {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+        }
+
+        .message {
+            display: flex;
+            margin: 5px 0;
+            max-width: 70%;
+            color: #fff;
+        }
+
+        .user-message {
+            margin-left: auto;
+            background-color: #2c3044;
+            padding: 10px;
+            border-radius: 10px;
+            border-bottom-right-radius: 0;
+        }
+
+        .bot-message {
+            margin-right: auto;
+            background-color: #2c3044;
+            padding: 10px;
+            border-radius: 10px;
+            border-bottom-left-radius: 0;
+        }
+
+        .input-wrapper {
+            position: relative;
+            max-width: 900px;
+            margin: 1rem auto;
+            padding: 1rem;
+            width: 100%;
+        }
+
+        .input-container {
+            background-color: #1a1c25;
+            border: 1px solid #2a2b32;
+            border-radius: 8px;
+            padding: 0.5rem;
+            display: flex;
+            align-items: flex-end;
+        }
+
+        .message-input {
+            flex: 1;
+            background: none;
+            border: none;
+            color: white;
+            padding: 0.5rem;
+            min-height: 40px;
+            max-height: 200px;
+            resize: none;
+            outline: none;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+
+        .send-button {
+            background: #5436DA;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 12px;
+            color: white;
+            cursor: pointer;
+            margin-left: 0.5rem;
+            transition: background-color 0.3s;
+        }
+
+        .send-button:hover {
+            background-color: #4a2ec4;
+        }
+
+        .send-button:disabled {
+            background-color: #2a2b32;
+            cursor: not-allowed;
+        }
+
+        .game-area {
+            background-color: #0f1117;
+            border: 1px solid #2a2b32;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+            color: #fff;
+        }
+        
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            color: #fff;
+        }
+        
+        .game-message {
+            color: #10a37f;
+            font-weight: bold;
+            margin: 0.5rem 0;
+        }
+        
+        .quiz-question, .algebra-problem {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            color: #fff;
+        }
+        
+        .game-input {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .game-input input {
+            background-color: #1a1c25;
+            border: 1px solid #2a2b32;
+            color: #fff;
+            padding: 0.5rem;
+            border-radius: 4px;
+            flex-grow: 1;
+        }
+
+        .game-input button {
+            background-color: #10a37f;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .game-input button:hover {
+            background-color: #0d8c6d;
+        }
+
+        .game-input .quit-button {
+            background-color: #e74c3c;
+        }
+
+        .game-input .quit-button:hover {
+            background-color: #c0392b;
+        }
+
+        .game-options {
+            background-color: #1a1c25;
+            padding: 0.5rem;
+            border-radius: 6px;
+            margin-top: 0.5rem;
+            display: inline-block;
+        }
+
+        .game-title {
+            margin-bottom: 0.5rem;
+            font-size: 0.95em;
+            color: #fff;
+        }
+
+        .game-list {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .game-item {
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            background-color: #2a2b32;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.2s;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+
+        .game-item:hover {
+            background-color: #3a3b42;
+            transform: translateY(-2px);
+        }
+
+        /* Game styles */
+        .game-options-container {
+            width: 280px;
+            padding: 6px;
+            height: auto;
+            min-height: 200px;
+            margin: 0 auto;
+        }
+        
+        .game-options-container h3 {
+            margin-bottom: 12px;
+            color: #fff;
+            font-size: 1.1em;
+            text-align: center;
+        }
+        
+        .game-options {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .game-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            padding: 8px 12px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            width: 100%;
+            text-align: left;
+        }
+        
+        .game-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .game-btn span {
+            font-size: 0.95em;
+            font-weight: 500;
+            color: #fff;
+            margin-bottom: 2px;
+        }
+        
+        .game-btn small {
+            font-size: 0.8em;
+            color: #aaa;
+        }
+
+        .game-area .message-timestamp,
+        .game-area .message-actions {
+            padding: 4px 8px;
+            margin-top: 4px;
+            color: #fff;
+            text-align: right;
+        }
+
+        /* Add styles for links in messages */
+        .message-content a {
+            color: #3498db;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .message-content a:hover {
+            color: #2980b9;
+            text-decoration: underline;
+        }
+
+        /* Retry button styles */
+        .retry-btn {
+            background-color: #e1e1e1;
+            border: none;
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .retry-btn:hover {
+            background-color: #d1d1d1;
+        }
+
+        /* Game styles */
+        .game-options-container {
+            width: 280px;
+            padding: 6px;
+            height: 300px;
+        }
+        
+        .game-options-container h3 {
+            margin-bottom: 12px;
+            color: #fff;
+            font-size: 1.1em;
+        }
+        
+        .game-options {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .game-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            padding: 8px 12px;
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            width: 100%;
+            text-align: left;
+        }
+        
+        .game-btn:hover {
+            background-color: #e9ecef;
+            border-color: #dee2e6;
+        }
+        
+        .game-btn span {
+            font-size: 0.95em;
+            font-weight: 500;
+            color: #2c3e50;
+            margin-bottom: 2px;
+        }
+        
+        .game-btn small {
+            font-size: 0.8em;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div class="modal-overlay" id="modalOverlay"></div>
+    <div class="profile-modal" id="profileModal">
+        <button class="close-modal" onclick="closeProfileModal()">×</button>
+        <h2>Profile Settings</h2>
+        <form id="profileForm" onsubmit="saveProfile(event)">
+            <div class="form-group">
+                <label for="fullName">Full Name</label>
+                <input type="text" id="fullName" name="fullName" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="bio">Bio</label>
+                <textarea id="bio" name="bio" rows="3"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="location">Location</label>
+                <input type="text" id="location" name="location">
+            </div>
+            <div class="form-group">
+                <label for="voiceSelect">Text-to-Speech Voice</label>
+                <select id="voiceSelect" name="voiceSelect">
+                    <!-- Will be populated with available voices -->
+                </select>
+            </div>
+            <div class="modal-buttons">
+                <button type="button" class="modal-btn cancel-btn" onclick="closeProfileModal()">Cancel</button>
+                <button type="submit" class="modal-btn save-btn">Save Changes</button>
+            </div>
+        </form>
+    </div>
+    <header class="header">
+        <div class="logo">
+            <span>NAVA</span>
+        </div>
+        <div class="nav-items">
+            <a href="{{ url_for('index') }}" class="nav-button">Home</a>
+            <div class="user-section" style="position: relative;">
+                <button class="user-button" id="userButton" onclick="toggleUserMenu(event)">
+                    <div class="user-avatar" id="userAvatar">J</div>
+                </button>
+                <div class="user-menu" id="userMenu">
+                    <div class="user-menu-header">
+                        <div class="user-menu-name" id="userMenuName">test</div>
+                        <div class="user-menu-email" id="userMenuEmail">test@example.com</div>
+                    </div>
+                    <div class="user-menu-items">
+                        <div class="user-menu-item" onclick="openProfileModal()">
+                            <i>👤</i> Profile Settings
+                        </div>
+                        <div class="user-menu-item" onclick="logout()">
+                            <i>🚪</i> Logout
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="chat-container" id="chatContainer">
+        <div class="chat-messages" id="chatMessages">
+            <!-- Messages will be added here dynamically -->
+        </div>
+    </div>
+
+    <div class="input-wrapper">
+        <div class="input-container">
+            <textarea 
+                class="message-input" 
+                placeholder="Type a message here..." 
+                id="messageInput"
+                rows="1"
+            ></textarea>
+            <button class="send-button" id="sendButton" disabled>Send</button>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBmbUvO3TOqMqLHZ6EehRgmKPv-dWOtZtU",
+            authDomain: "signlog-1b4ab.firebaseapp.com",
+            projectId: "signlog-1b4ab",
+            storageBucket: "signlog-1b4ab.firebasestorage.app",
+            messagingSenderId: "21919134283",
+            appId: "1:21919134283:web:780404d8876972742b53ce",
+            measurementId: "G-D80BS0F05P"
+          };
+
+        // Initialize Firebase
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+
+        const auth = firebase.auth();
+
+        const messageInput = document.getElementById('messageInput');
+        const sendButton = document.getElementById('sendButton');
+        const chatContainer = document.getElementById('chatContainer');
+        const chatMessages = document.getElementById('chatMessages');
+        const userButton = document.getElementById('userButton');
+        const userMenu = document.getElementById('userMenu');
+        const userAvatar = document.getElementById('userAvatar');
+        const userName = document.getElementById('userName');
+        const menuUserName = document.getElementById('menuUserName');
+        const menuUserEmail = document.getElementById('menuUserEmail');
+        const signOutButton = document.getElementById('signOutButton');
+        let currentGame = null;
+        let gameArea = null;
+
+        // Check if user is authenticated
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                // User is signed in
+                userAvatar.textContent = user.email[0].toUpperCase();
+                userName.textContent = user.displayName || user.email.split('@')[0];
+                menuUserName.textContent = user.displayName || user.email.split('@')[0];
+                menuUserEmail.textContent = user.email;
+            } else {
+                // No user is signed in, redirect to login page
+                window.location.href = '/login';
+            }
+        });
+
+        // Toggle user menu
+        function toggleUserMenu(event) {
+            event.stopPropagation();
+            const userMenu = document.getElementById('userMenu');
+            userMenu.classList.toggle('active');
+
+            // Load profile data when opening menu
+            const profileData = JSON.parse(localStorage.getItem('profileData') || '{}');
+            if (profileData.fullName) {
+                document.getElementById('userMenuName').textContent = profileData.fullName;
+                document.getElementById('userAvatar').textContent = profileData.fullName.charAt(0).toUpperCase();
+            }
+            if (profileData.email) {
+                document.getElementById('userMenuEmail').textContent = profileData.email;
+            }
+        }
+
+        // Close menu when clicking outside
+        document.addEventListener('click', function(event) {
+            const userMenu = document.getElementById('userMenu');
+            const userButton = document.getElementById('userButton');
+            if (!userButton.contains(event.target) && !userMenu.contains(event.target)) {
+                userMenu.classList.remove('active');
+            }
+        });
+
+        // Function to safely set HTML content
+        function setInnerHTML(element, html) {
+            // Convert URL tags to buttons
+            html = html.replace(/<url>(.*?)<\/url>/g, function(match, url) {
+                return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="music-button">
+                    <i class="fas fa-music"></i>Listen to Music</a>`;
+            });
+            element.innerHTML = html;
+        }
+
+        // Function to format time
+        function formatTime(date) {
+            let hours = date.getHours();
+            const minutes = date.getMinutes().toString().padStart(2, '0');
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12; // convert 0 to 12
+            return `${hours}:${minutes} ${ampm}`;
+        }
+
+        // Function to add a message to the chat
+        function addMessage(content, isUser = true, isStory = false, isMusic = false) {
+            if (content.includes("Which game would you like to play?")) {
+                const messageContainer = document.createElement('div');
+                
+                // messageContainer.className = 'message-container';
+                
+                const messageDiv = document.createElement('div');
+                // messageDiv.className = isUser ? 'message user-message' : 'message bot-message';
+                
+                const textDiv = document.createElement('div');
+                // textDiv.className = 'message-content';
+                // textDiv.innerHTML = content.replace(/\n/g, '<br>');
+                
+
+                const timestampDiv = document.createElement('div');
+                // timestampDiv.className = 'message-timestamp';
+                // timestampDiv.textContent = formatTime(new Date());
+
+                if (!isUser) {
+                    const actionsDiv = document.createElement('div');
+                    actionsDiv.className = 'message-actions';
+
+                    const speakerIcon = document.createElement('i');
+                    speakerIcon.className = 'fas fa-volume-up';
+                    speakerIcon.style.cursor = 'pointer';
+                    speakerIcon.onclick = () => speakText(content, speakerIcon);
+                    
+                    actionsDiv.appendChild(speakerIcon);
+                    textDiv.appendChild(actionsDiv);
+                }
+                
+                textDiv.appendChild(timestampDiv);
+                messageDiv.appendChild(textDiv);
+                messageContainer.appendChild(messageDiv);
+                chatMessages.appendChild(messageContainer);
+
+                // Create game choices after the message
+                const gameArea = document.createElement('div');
+                gameArea.className = 'game-area';
+                const formattedContent = `
+                    <div class="game-options-container">
+                        <h3>Choose a Game:</h3>
+                        <div class="game-options">
+                            <button onclick="selectGame('algebra')" class="game-btn">
+                                <span>🔢 Algebra Practice</span>
+                                <small>Solve math problems</small>
+                            </button>
+                            <button onclick="selectGame('hangman')" class="game-btn">
+                                <span>🎯 Hangman</span>
+                                <small>Guess the word</small>
+                            </button>
+                            <button onclick="selectGame('quiz')" class="game-btn">
+                                <span>❓ Quiz Game</span>
+                                <small>Test your knowledge</small>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="message-timestamp">${formatTime(new Date())}</div>
+                    <div class="message-actions">
+                        <i class="fas fa-volume-up" style="cursor: pointer;" onclick="speakText('Choose a Game. Available games are: Algebra Practice, Hangman, and Quiz Game', this)"></i>
+                    </div>`;
+                gameArea.innerHTML = formattedContent;
+                chatMessages.appendChild(gameArea);
+                return;
+            }
+
+            const messageContainer = document.createElement('div');
+            messageContainer.className = 'message-container';
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
+            
+            const textDiv = document.createElement('div');
+            textDiv.className = 'message-content';
+            
+            if (isStory) {
+                setInnerHTML(textDiv, `<div class="story-container">${content}<button class="retry-btn" onclick="retryStory()">Try Another Story</button></div>`);
+            } else if (isMusic) {
+                setInnerHTML(textDiv, `<div class="music-container">${content}<button class="retry-btn" onclick="retryMusic()">Try Another Recommendation</button></div>`);
+            } else if (content.includes('<url>')) {
+                setInnerHTML(textDiv, content);
+            } else {
+                textDiv.textContent = content;
+            }
+
+            const timestampDiv = document.createElement('div');
+            timestampDiv.className = 'message-timestamp';
+            timestampDiv.textContent = formatTime(new Date());
+
+            if (!isUser) {
+                const actionsDiv = document.createElement('div');
+                actionsDiv.className = 'message-actions';
+
+                const speakerIcon = document.createElement('i');
+                speakerIcon.className = 'fas fa-volume-up';
+                speakerIcon.style.cursor = 'pointer';
+                speakerIcon.onclick = () => speakText(content, speakerIcon);
+                
+                actionsDiv.appendChild(speakerIcon);
+                textDiv.appendChild(actionsDiv);
+            }
+            
+            textDiv.appendChild(timestampDiv);
+            messageDiv.appendChild(textDiv);
+            messageContainer.appendChild(messageDiv);
+            chatMessages.appendChild(messageContainer);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function selectGame(gameChoice) {
+            // Send the game choice to the server
+            const messageInput = document.getElementById('messageInput');
+            messageInput.value = gameChoice;
+            
+            // Add user message to chat
+            addMessage(gameChoice, true);
+            
+            // Send to server without adding message again
+            sendMessageWithoutDisplay();
+        }
+
+        // New function to send message without displaying it again
+        async function sendMessageWithoutDisplay() {
+            const messageInput = document.getElementById('messageInput');
+            const message = messageInput.value.trim();
+            
+            if (message === '') return;
+
+            // Clear input
+            messageInput.value = '';
+            messageInput.style.height = 'auto';
+            
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            try {
+                const response = await fetch('/process_chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ message: message })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                
+                const data = await response.json();
+                if (data.game_type) {
+                    handleGameResponse(data);
+                } else {
+                    addMessage(data.response, false, data.isStory, data.isMusic);
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+                addMessage('Sorry, there was an error processing your message.', false);
+            }
+            
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Function to send message to Flask backend
+        async function sendMessage() {
+            const messageInput = document.getElementById('messageInput');
+            const message = messageInput.value.trim();
+            
+            if (message === '') return;
+
+            // Clear input
+            messageInput.value = '';
+            messageInput.style.height = 'auto';
+            
+            // Add user message to chat
+            addMessage(message, true);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            try {
+                const response = await fetch('/process_chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ message: message })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                
+                const data = await response.json();
+                if (data.game_type) {
+                    handleGameResponse(data);
+                } else {
+                    addMessage(data.response, false, data.isStory, data.isMusic);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                addMessage("Sorry, I couldn't process your message. Please try again.", false);
+            }
+        }
+
+        function handleGameResponse(data) {
+            if (data.game_type === "none") {
+                // Handle quit game response
+                addMessage(data.response, false);
+                showGameChoices();
+                return;
+            }
+
+            if (!data.game_type) {
+                // If no game type, just show the response message
+                addMessage(data.response, false);
+                showGameChoices();
+                return;
+            }
+
+            // Add the game introduction message
+            addMessage(data.response, false);
+
+            // Set the current game type
+            currentGame = data.game_type;
+
+            // Create game area if it doesn't exist
+            if (!gameArea) {
+                gameArea = document.createElement('div');
+                gameArea.className = 'game-area';
+                chatMessages.appendChild(gameArea);
+            }
+
+            // Update game area content based on game type
+            updateGameArea(data.game_type, data.game_data);
+        }
+
+        function showGameChoices() {
+            const formattedContent = `
+                <div class="game-options-container">
+                    <h3>Choose a Game:</h3>
+                    <div class="game-options">
+                        <button onclick="selectGame('algebra')" class="game-btn">
+                            <span>🔢 Algebra Practice</span>
+                            <small>Solve math problems</small>
+                        </button>
+                        <button onclick="selectGame('hangman')" class="game-btn">
+                            <span>🎯 Hangman</span>
+                            <small>Guess the word</small>
+                        </button>
+                        <button onclick="selectGame('quiz')" class="game-btn">
+                            <span>❓ Quiz Game</span>
+                            <small>Test your knowledge</small>
+                        </button>
+                    </div>
+                </div>
+                <div class="message-timestamp">${formatTime(new Date())}</div>
+                <div class="message-actions">
+                    <i class="fas fa-volume-up" style="cursor: pointer;" onclick="speakText('Choose a Game. Available games are: Algebra Practice, Hangman, and Quiz Game', this)"></i>
+                </div>`;
+            
+            if (!gameArea) {
+                gameArea = document.createElement('div');
+                gameArea.className = 'game-area';
+                chatMessages.appendChild(gameArea);
+            }
+            gameArea.innerHTML = formattedContent;
+        }
+
+        function updateGameArea(gameType, gameData, message = null) {
+            if (!gameArea) return;
+
+            const responseHtml = message ? `<div class="game-message">${message}</div>` : '';
+
+            if (gameType === 'hangman') {
+                gameArea.innerHTML = `
+                    <div class="game-container">
+                        <div>Category: ${gameData.category}</div>
+                        <div>Word: ${gameData.display}</div>
+                        <div>Guessed Letters: ${gameData.guessed}</div>
+                        <div>Chances Left: ${gameData.chances}</div>
+                        ${responseHtml}
+                        <form class="game-input" onsubmit="submitGameAnswer(event)">
+                            <input type="text" maxlength="1" placeholder="Enter a letter" pattern="[A-Za-z]" required>
+                            <button type="submit">Guess</button>
+                            <button type="button" class="quit-button" onclick="quitGame()">Quit Game</button>
+                        </form>
+                    </div>
+                `;
+            } else if (gameType === 'quiz') {
+                gameArea.innerHTML = `
+                    <div class="game-container">
+                        <div class="quiz-question">${gameData.question}</div>
+                        ${responseHtml}
+                        <form class="game-input" onsubmit="submitGameAnswer(event)">
+                            <input type="text" placeholder="Enter your answer" required>
+                            <button type="submit">Submit Answer</button>
+                            <button type="button" class="quit-button" onclick="quitGame()">Quit Game</button>
+                        </form>
+                    </div>
+                `;
+            } else if (gameType === 'algebra') {
+                gameArea.innerHTML = `
+                    <div class="game-container">
+                        <div class="algebra-problem">${gameData.problem}</div>
+                        ${responseHtml}
+                        <form class="game-input" onsubmit="submitGameAnswer(event)">
+                            <input type="number" step="any" placeholder="Enter your answer" required>
+                            <button type="submit">Submit Answer</button>
+                            <button type="button" class="quit-button" onclick="quitGame()">Quit Game</button>
+                        </form>
+                    </div>
+                `;
+            }
+
+            // Focus on the input
+            const input = gameArea.querySelector('input');
+            if (input) input.focus();
+        }
+
+        function quitGame() {
+            if (gameArea) {
+                gameArea.remove();
+                gameArea = null;
+            }
+            currentGame = null;
+            
+            // Add a message indicating game was quit
+            addMessage("Game ended. Choose another game to play!", false);
+            
+            // Show game choices
+            showGameChoices();
+        }
+
+        async function submitGameAnswer(event) {
+            event.preventDefault();
+            const gameInput = document.getElementById('gameInput');
+            const answer = gameInput.value.trim();
+            
+            if (answer === '') return;
+            
+            // Add user's answer to chat
+            addMessage(answer, true);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            gameInput.value = '';
+            
+            try {
+                const response = await fetch('/submit_answer', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ answer: answer })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                
+                const data = await response.json();
+                
+                // Update game area with response
+                updateGameArea(data.game_type, data.game_data, data.message);
+                
+                // Add bot's response to chat if present
+                if (data.message) {
+                    addMessage(data.message, false);
+                    // First scroll
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                    // Second scroll after a short delay
+                    setTimeout(() => {
+                        chatMessages.scrollTop = chatMessages.scrollHeight;
+                    }, 100);
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+                addMessage('Sorry, there was an error processing your answer.', false);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+        }
+
+        // Function to update send button state
+        function updateSendButton() {
+            sendButton.disabled = messageInput.value.trim() === '';
+        }
+
+        // Auto-resize textarea
+        messageInput.addEventListener('input', function () {
+            this.style.height = 'auto';
+            this.style.height = `${this.scrollHeight}px`;
+            updateSendButton();
+        });
+
+        // Handle enter key
+        messageInput.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                if (!sendButton.disabled) {
+                    sendMessage();
+                }
+            }
+        });
+
+        // Handle send button click
+        sendButton.addEventListener('click', sendMessage);
+
+        // Initial button state
+        updateSendButton();
+
+        // Add logout function
+        function logout() {
+            fetch('/logout')
+                .then(() => {
+                    window.location.href = '/login';
+                })
+                .catch(error => {
+                    console.error('Error logging out:', error);
+                });
+        }
+
+        // Add introduction message when page loads
+        window.addEventListener('DOMContentLoaded', (event) => {
+            setTimeout(() => {
+                const introMessage = "Hi! I'm NAVA, your friendly AI assistant. I'm here to chat, play games, and help you with anything you need. Feel free to start a conversation or try out some fun games!";
+                addMessage(introMessage, false);
+            }, 500);
+        });
+
+        // Function to scroll chat to bottom
+        function scrollToBottom() {
+            const chatContainer = document.querySelector('.chat-container');
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        // Add Text-to-Speech functionality
+        let currentSpeech = null;
+        let isSpeaking = false;
+
+        function stopCurrentSpeech() {
+            if (window.speechSynthesis) {
+                window.speechSynthesis.cancel();
+                currentSpeech = null;
+                isSpeaking = false;
+            }
+        }
+
+        function speakText(text, speakerIcon) {
+            if (!window.speechSynthesis) {
+                console.error('Speech synthesis not supported');
+                return;
+            }
+
+            if (isSpeaking) {
+                stopCurrentSpeech();
+                speakerIcon.style.color = '#fff';
+                return;
+            }
+
+            const utterance = new SpeechSynthesisUtterance(text);
+            const profileData = JSON.parse(localStorage.getItem('profileData') || '{}');
+            const voices = window.speechSynthesis.getVoices();
+            
+            if (profileData.voice) {
+                const selectedVoice = voices.find(v => v.name === profileData.voice);
+                if (selectedVoice) {
+                    utterance.voice = selectedVoice;
+                }
+            }
+
+            utterance.onend = function() {
+                isSpeaking = false;
+                speakerIcon.style.color = '#fff';
+            };
+
+            utterance.onerror = function() {
+                isSpeaking = false;
+                speakerIcon.style.color = '#fff';
+            };
+
+            currentSpeech = utterance;
+            isSpeaking = true;
+            speakerIcon.style.color = '#4CAF50';
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // Initialize voice list when voices are loaded
+        if (window.speechSynthesis) {
+            window.speechSynthesis.onvoiceschanged = function() {
+                const voiceSelect = document.getElementById('voiceSelect');
+                if (voiceSelect) {
+                    const voices = window.speechSynthesis.getVoices();
+                    voiceSelect.innerHTML = '';
+                    voices.forEach(voice => {
+                        const option = document.createElement('option');
+                        option.value = voice.name;
+                        option.textContent = `${voice.name} (${voice.lang})`;
+                        voiceSelect.appendChild(option);
+                    });
+                    
+                    // Set selected voice if available
+                    const profileData = JSON.parse(localStorage.getItem('profileData') || '{}');
+                    if (profileData.voice) {
+                        voiceSelect.value = profileData.voice;
+                    }
+                }
+            };
+        }
+
+        // Update the click handler for the user button
+        document.getElementById('userButton').onclick = toggleUserMenu;
+
+        // Load profile data on page load
+        window.addEventListener('DOMContentLoaded', function() {
+            const profileData = JSON.parse(localStorage.getItem('profileData') || '{}');
+            if (profileData.fullName) {
+                document.getElementById('userMenuName').textContent = profileData.fullName;
+                document.getElementById('userAvatar').textContent = profileData.fullName.charAt(0).toUpperCase();
+            }
+            if (profileData.email) {
+                document.getElementById('userMenuEmail').textContent = profileData.email;
+            }
+        });
+
+        function openProfileModal() {
+            document.getElementById('profileModal').style.display = 'block';
+            document.getElementById('modalOverlay').style.display = 'block';
+            // Load existing profile data if available
+            const profileData = JSON.parse(localStorage.getItem('profileData') || '{}');
+            document.getElementById('fullName').value = profileData.fullName || '';
+            document.getElementById('email').value = profileData.email || '';
+            document.getElementById('bio').value = profileData.bio || '';
+            document.getElementById('location').value = profileData.location || '';
+            // Populate voice select
+            const voiceSelect = document.getElementById('voiceSelect');
+            const voices = window.speechSynthesis.getVoices();
+            voices.forEach(voice => {
+                const option = document.createElement('option');
+                option.value = voice.name;
+                option.textContent = `${voice.name} (${voice.lang})`;
+                voiceSelect.appendChild(option);
+            });
+            // Set selected voice if available
+            if (profileData.voice) {
+                voiceSelect.value = profileData.voice;
+            }
+        }
+
+        function closeProfileModal() {
+            document.getElementById('profileModal').style.display = 'none';
+            document.getElementById('modalOverlay').style.display = 'none';
+        }
+
+        function saveProfile(event) {
+            event.preventDefault();
+            const formData = {
+                fullName: document.getElementById('fullName').value,
+                email: document.getElementById('email').value,
+                bio: document.getElementById('bio').value,
+                location: document.getElementById('location').value,
+                voice: document.getElementById('voiceSelect').value
+            };
+            
+            // Save to localStorage
+            localStorage.setItem('profileData', JSON.stringify(formData));
+            
+            // Update UI elements
+            const userAvatar = document.getElementById('userAvatar');
+            const userMenuName = document.getElementById('userMenuName');
+            const userMenuEmail = document.getElementById('userMenuEmail');
+            
+            if (formData.fullName) {
+                userAvatar.textContent = formData.fullName.charAt(0).toUpperCase();
+                userMenuName.textContent = formData.fullName;
+            }
+            if (formData.email) {
+                userMenuEmail.textContent = formData.email;
+            }
+            
+            // Close modal
+            closeProfileModal();
+            
+            // Show success message
+            alert('Profile updated successfully!');
+        }
+
+        // Function to retry story generation
+        async function retryStory() {
+            try {
+                const response = await fetch('/retry_story', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                
+                const data = await response.json();
+                addMessage(data.response, false, data.isStory);
+            } catch (error) {
+                console.error('Error:', error);
+                addMessage("Sorry, I couldn't generate a new story. Please try again.", false);
+            }
+        }
+
+        // Function to retry music recommendation
+        async function retryMusic() {
+            try {
+                const response = await fetch('/retry_music', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                
+                const data = await response.json();
+                addMessage(data.response, false);
+            } catch (error) {
+                console.error('Error:', error);
+                addMessage("Sorry, I couldn't get a new music recommendation. Please try again.", false);
+            }
+        }
+    </script>
+</body>
+</html>

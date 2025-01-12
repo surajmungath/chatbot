@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0A2647, #144272);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 2rem 0;
+        }
+
+        .welcome {
+            text-align: center;
+            animation: fadeIn 1.5s ease-out;
+            margin-top: 10vh;
+        }
+
+        .logo {
+            width: 10px;
+            height: 10px;
+            background: #2C74B3;
+            border-radius: 50%;
+            margin: 0 auto 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            font-weight: bold;
+            animation: pulse 2s infinite;
+        }
+
+        .title {
+            font-size: 4rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, #fff, #2C74B3);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            font-size: 1.5rem;
+            opacity: 0.9;
+            margin-bottom: 3rem;
+        }
+
+        .start-btn {
+            padding: 1.2rem 3.5rem;
+            font-size: 1.3rem;
+            background: linear-gradient(45deg, #2C74B3, #205295);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(44, 116, 179, 0.3);
+        }
+
+        .start-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(44, 116, 179, 0.4);
+        }
+
+        .footer {
+            text-align: center;
+            width: 100%;
+            padding: 2rem 0;
+        }
+
+        .social-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            justify-content: center;
+            margin-bottom: 2rem;
+            padding: 0 1rem;
+        }
+
+        .social-link {
+            color: white;
+            text-decoration: none;
+            font-size: 1rem;
+            padding: 0.8rem 1.5rem;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            transition: all 0.3s;
+            flex: 1;
+            min-width: 120px;
+            max-width: 200px;
+            text-align: center;
+        }
+
+        .social-link:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .bottom-logo {
+            font-size: 1.2rem;
+            opacity: 0.7;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        @media (max-width: 480px) {
+            .social-links {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .social-link {
+                max-width: none;
+            }
+            
+            .start-btn {
+                padding: 1rem 2.5rem;
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="welcome">
+        <div class="logo"><img src="C:\Users\hpcnd\OneDrive\Desktop\suraj\project-chatbot\Home\img\group-7.png"></div>
+        <div class="title">Welcome to Nava</div>
+        <div class="subtitle">Your Intelligent AI Assistant</div>
+        <a href="chat.html"><button class="start-btn">Get Started</button></a>
+    </div>
+
+    <footer class="footer">
+        <div class="social-links">
+            <a href="#" class="social-link">Instagram</a>
+            <a href="#" class="social-link">Twitter</a>
+            <a href="#" class="social-link">YouTube</a>
+            <a href="#" class="social-link">LinkedIn</a>
+        </div>
+        <div class="bottom-logo">NAVA</div>
+    </footer>
+</body>
+</html>

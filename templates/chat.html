@@ -1,0 +1,1681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NAVA Chat</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background-color: #0f1117;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .header {
+            background-color: #1a1c25;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #2a2b32;
+            flex-shrink: 0;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: white;
+            font-weight: bold;
+        }
+
+        .nav-items {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .nav-button {
+            background: none;
+            border: none;
+            color: #fff;
+            cursor: pointer;
+            padding: 0.5rem 1rem;
+        }
+
+        /* User Profile Styles */
+        .user-section {
+            position: relative;
+            margin-left: 1rem;
+        }
+
+        .user-button {
+            background: none;
+            border: none;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 4px;
+        }
+
+        .user-button:hover {
+            background-color: #2a2b32;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background-color: #5436DA;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .user-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: #1a1c25;
+            border-radius: 10px;
+            padding: 10px 0;
+            min-width: 200px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+            display: none;
+            z-index: 1000;
+        }
+
+        .user-menu.active {
+            display: block;
+        }
+
+        .user-menu-header {
+            padding: 10px 15px;
+            border-bottom: 1px solid #2a2b32;
+        }
+
+        .user-menu-name {
+            font-weight: bold;
+            color: #fff;
+            margin-bottom: 5px;
+        }
+
+        .user-menu-email {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .user-menu-items {
+            padding: 5px 0;
+        }
+
+        .user-menu-item {
+            padding: 8px 15px;
+            color: #fff;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-menu-item:hover {
+            background: #2a2b32;
+        }
+
+        .user-menu-item i {
+            font-size: 16px;
+            color: #666;
+        }
+
+        /* Profile Modal Styles */
+        .profile-modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #1a1c25;
+            padding: 2rem;
+            border-radius: 12px;
+            z-index: 1001;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+
+        .profile-modal h2 {
+            color: #fff;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .profile-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            color: white;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 6px;
+            border: 1px solid #2a2b32;
+            background: #2a2b32;
+            color: white;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .save-btn, .cancel-btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .save-btn {
+            background: #5436DA;
+            color: white;
+        }
+
+        .cancel-btn {
+            background: #2a2b32;
+            color: white;
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .modal-btn {
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .save-btn {
+            background: #5436DA;
+            color: #fff;
+        }
+
+        .cancel-btn {
+            background: #2a2b32;
+            color: #fff;
+        }
+
+        .modal-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        /* Speaker Icon Styles */
+        .message-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 5px;
+        }
+
+        .speaker-icon {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2em;
+            padding: 5px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: white;
+        }
+
+        .speaker-icon.speaking {
+            background-color: #4CAF50;
+            color: white;
+            transform: scale(1.1);
+        }
+
+        /* Message container update */
+        .message {
+            display: flex;
+            flex-direction: column;
+            max-width: 80%;
+            margin: 10px 0;
+        }
+
+        .user-message {
+            align-self: flex-end;
+        }
+
+        .bot-message {
+            align-self: flex-start;
+        }
+
+        .message-content {
+            display: flex;
+            flex-direction: column;
+            background-color: #2a2b32;
+            border-radius: 12px;
+            padding: 12px;
+            position: relative;
+        }
+
+        .user-message .message-content {
+            background-color: #5436DA;
+        }
+
+        .message-text {
+            color: white;
+            word-wrap: break-word;
+        }
+
+        .message-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 5px;
+            font-size: 12px;
+            color: #888;
+        }
+
+        .message-timestamp {
+            font-size: 0.8em;
+            color: #888;
+        }
+
+        .message-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .speaker-icon {
+            background: none;
+            border: none;
+            color: #888;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .speaker-icon:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .retry-button {
+            background: none;
+            border: none;
+            color: #888;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .retry-button:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            background-color: #0f1117;
+        }
+
+        .input-area {
+            background-color: #1a1c25;
+            border-top: 1px solid #2a2b32;
+            padding: 1rem;
+            flex-shrink: 0;
+        }
+
+        .input-container {
+            display: flex;
+            gap: 10px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .message-input {
+            flex: 1;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #2a2b32;
+            background-color: #2a2b32;
+            color: white;
+            resize: none;
+            min-height: 24px;
+            max-height: 150px;
+            font-family: inherit;
+        }
+
+        .message-input:focus {
+            outline: none;
+            border-color: #5436DA;
+        }
+
+        .send-button {
+            background-color: #5436DA;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 24px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .send-button:hover {
+            background-color: #4525c4;
+        }
+
+        .send-button:disabled {
+            background-color: #2a2b32;
+            cursor: not-allowed;
+        }
+
+        /* Add game area styles */
+        .game-area {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .game-input {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .game-input input {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .game-input button {
+            padding: 8px 16px;
+            background: #2980b9;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .game-message {
+            color: #666;
+            font-style: italic;
+        }
+
+        .game-choice {
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 5px;
+            background: #2980b9;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .game-choice:hover {
+            background: #3498db;
+        }
+
+        /* Add quit button styles */
+        .quit-button {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 16px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background-color 0.3s;
+        }
+
+        .quit-button:hover {
+            background-color: #c82333;
+        }
+
+        /* Rest of the previous styles remain the same */
+        .chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 2rem;
+        }
+        
+        .chat-messages {
+            flex-grow: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .input-area {
+            position: relative;
+            max-width: 900px;
+            margin: 1rem auto;
+            padding: 1rem;
+            width: 100%;
+        }
+
+        .input-container {
+            background-color: #1a1c25;
+            border: 1px solid #2a2b32;
+            border-radius: 8px;
+            padding: 0.5rem;
+            display: flex;
+            align-items: flex-end;
+        }
+
+        .message-input {
+            flex: 1;
+            background: none;
+            border: none;
+            color: white;
+            padding: 0.5rem;
+            min-height: 40px;
+            max-height: 200px;
+            resize: none;
+            outline: none;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+
+        .send-button {
+            background: #5436DA;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 12px;
+            color: white;
+            cursor: pointer;
+            margin-left: 0.5rem;
+            transition: background-color 0.3s;
+        }
+
+        .send-button:hover {
+            background-color: #4a2ec4;
+        }
+
+        .send-button:disabled {
+            background-color: #2a2b32;
+            cursor: not-allowed;
+        }
+
+        .game-area {
+            background-color: #0f1117;
+            border: 1px solid #2a2b32;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+            color: #fff;
+        }
+        
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            color: #fff;
+        }
+        
+        .game-message {
+            color: #10a37f;
+            font-weight: bold;
+            margin: 0.5rem 0;
+        }
+        
+        .quiz-question, .algebra-problem {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            color: #fff;
+        }
+        
+        .game-input {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .game-input input {
+            background-color: #1a1c25;
+            border: 1px solid #2a2b32;
+            color: #fff;
+            padding: 0.5rem;
+            border-radius: 4px;
+            flex-grow: 1;
+        }
+
+        .game-input button {
+            background-color: #10a37f;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .game-input button:hover {
+            background-color: #0d8c6d;
+        }
+
+        .game-input .quit-button {
+            background-color: #e74c3c;
+        }
+
+        .game-input .quit-button:hover {
+            background-color: #c0392b;
+        }
+
+        .game-options {
+            background-color: #1a1c25;
+            padding: 0.5rem;
+            border-radius: 6px;
+            margin-top: 0.5rem;
+            display: inline-block;
+        }
+
+        .game-title {
+            margin-bottom: 0.5rem;
+            font-size: 0.95em;
+            color: #fff;
+        }
+
+        .game-list {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .game-item {
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            background-color: #2a2b32;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.2s;
+            font-size: 0.9em;
+            white-space: nowrap;
+            color: #fff;
+        }
+
+        .game-item:hover {
+            background-color: #3a3b42;
+            transform: translateY(-2px);
+        }
+
+        /* Add styles for links in messages */
+        .message-content a {
+            color: #2980b9;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 10px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            margin-top: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .message-content a:hover {
+            background: #e9ecef;
+            transform: translateY(-1px);
+        }
+
+        .message-content a::before {
+            content: '🎵';
+            font-size: 1.2em;
+        }
+
+        /* Add styles for correct/incorrect answers */
+        .wrong-answer {
+            background-color: rgba(255, 0, 0, 0.1);
+            border-left: 3px solid #ff4444;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+
+        .correct-answer {
+            background-color: rgba(0, 255, 0, 0.1);
+            border-left: 3px solid #44ff44;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 4px;
+        }
+
+        .question-review {
+            margin-top: 5px;
+            font-style: italic;
+            color: #888;
+        }
+
+        /* Hide scrollbar for Chrome, Safari and Opera */
+        .chat-messages::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* Hide scrollbar for IE, Edge and Firefox */
+        .chat-messages {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+    </style>
+</head>
+<body>
+    <div class="modal-overlay" id="modalOverlay"></div>
+    <div class="profile-modal" id="profileModal">
+        <button class="close-modal" onclick="closeProfileModal()">×</button>
+        <h2>Profile Settings</h2>
+        <form id="profileForm" onsubmit="saveProfile(event)">
+            <div class="form-group">
+                <label for="fullName">Full Name</label>
+                <input type="text" id="fullName" name="fullName" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="bio">Bio</label>
+                <textarea id="bio" name="bio" rows="3"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="location">Location</label>
+                <input type="text" id="location" name="location">
+            </div>
+            <div class="form-group">
+                <label for="voiceSelect">Text-to-Speech Voice</label>
+                <select id="voiceSelect" name="voiceSelect">
+                    <!-- Will be populated with available voices -->
+                </select>
+            </div>
+            <div class="modal-buttons">
+                <button type="button" class="modal-btn cancel-btn" onclick="closeProfileModal()">Cancel</button>
+                <button type="submit" class="modal-btn save-btn">Save Changes</button>
+            </div>
+        </form>
+    </div>
+    <header class="header">
+        <div class="logo">
+            <span>NAVA</span>
+        </div>
+        <div class="nav-items">
+            <a href="{{ url_for('index') }}" class="nav-button">Home</a>
+            <div class="user-section" style="position: relative;">
+                <button class="user-button" id="userButton" onclick="toggleUserMenu(event)">
+                    <div class="user-avatar" id="userAvatar">J</div>
+                </button>
+                <div class="user-menu" id="userMenu">
+                    <div class="user-menu-header">
+                        <div class="user-menu-name" id="userMenuName">John Doe</div>
+                        <div class="user-menu-email" id="userMenuEmail">john@example.com</div>
+                    </div>
+                    <div class="user-menu-items">
+                        <div class="user-menu-item" onclick="openProfileModal()">
+                            <i>👤</i> Profile Settings
+                        </div>
+                        <div class="user-menu-item" onclick="logout()">
+                            <i>🚪</i> Logout
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="chat-messages" id="chatMessages">
+        <!-- Messages will be added here dynamically -->
+    </div>
+
+    <div class="input-area">
+        <div class="input-container">
+            <textarea 
+                class="message-input" 
+                placeholder="Type a message here..." 
+                id="messageInput"
+                rows="1"
+            ></textarea>
+            <button class="send-button" id="sendButton" disabled>
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
+    <script>
+        // Global variables for game functionality
+        let currentGame = null;
+        let currentGameArea = null;
+        let gameSelectionArea = null;
+        let chatMessages = document.querySelector('.chat-messages');
+        
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBmbUvO3TOqMqLHZ6EehRgmKPv-dWOtZtU",
+            authDomain: "signlog-1b4ab.firebaseapp.com",
+            projectId: "signlog-1b4ab",
+            storageBucket: "signlog-1b4ab.firebasestorage.app",
+            messagingSenderId: "21919134283",
+            appId: "1:21919134283:web:780404d8876972742b53ce",
+            measurementId: "G-D80BS0F05P"
+          };
+
+        // Initialize Firebase
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+
+        const auth = firebase.auth();
+
+        const messageInput = document.getElementById('messageInput');
+        const sendButton = document.getElementById('sendButton');
+        const chatContainer = document.getElementById('chatContainer');
+        const userButton = document.getElementById('userButton');
+        const userMenu = document.getElementById('userMenu');
+        const userAvatar = document.getElementById('userAvatar');
+        const userName = document.getElementById('userName');
+        const menuUserName = document.getElementById('menuUserName');
+        const menuUserEmail = document.getElementById('menuUserEmail');
+        const signOutButton = document.getElementById('signOutButton');
+        
+        // Check if user is authenticated
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                // User is signed in
+                userAvatar.textContent = user.email[0].toUpperCase();
+                userName.textContent = user.displayName || user.email.split('@')[0];
+                menuUserName.textContent = user.displayName || user.email.split('@')[0];
+                menuUserEmail.textContent = user.email;
+            } else {
+                // No user is signed in, redirect to login page
+                window.location.href = '/login';
+            }
+        });
+
+        // Toggle user menu
+        function toggleUserMenu(event) {
+            event.stopPropagation();
+            const userMenu = document.getElementById('userMenu');
+            userMenu.classList.toggle('active');
+
+            // Load profile data when opening menu
+            const profileData = JSON.parse(localStorage.getItem('profileData') || '{}');
+            if (profileData.fullName) {
+                document.getElementById('userMenuName').textContent = profileData.fullName;
+                document.getElementById('userAvatar').textContent = profileData.fullName.charAt(0).toUpperCase();
+            }
+            if (profileData.email) {
+                document.getElementById('userMenuEmail').textContent = profileData.email;
+            }
+        }
+
+        // Close menu when clicking outside
+        document.addEventListener('click', function(event) {
+            const userMenu = document.getElementById('userMenu');
+            const userButton = document.getElementById('userButton');
+            if (!userButton.contains(event.target) && !userMenu.contains(event.target)) {
+                userMenu.classList.remove('active');
+            }
+        });
+
+        // Function to safely set HTML content
+        function setInnerHTML(element, html) {
+            // Replace URL tags with actual links
+            html = html.replace(/<url>(.*?)<\/url>/g, (match, url) => {
+                return `<a href="${url}" target="_blank">Listen on YouTube</a>`;
+            });
+            element.innerHTML = html;
+        }
+
+        // Function to format time
+        function formatTime(date) {
+            const hours = date.getHours().toString().padStart(2, '0');
+            const minutes = date.getMinutes().toString().padStart(2, '0');
+            return `${hours}:${minutes}`;
+        }
+
+        // Function to add a message to the chat
+        function addMessage(content, isUser = true) {
+            const messagesContainer = document.querySelector('.chat-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = isUser ? 'user-message' : 'bot-message';
+            
+            // Create message content
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            
+            const textDiv = document.createElement('div');
+            textDiv.className = 'message-text';
+
+            // Create footer for timestamp and actions
+            const footerDiv = document.createElement('div');
+            footerDiv.className = 'message-footer';
+
+            // Add actions div
+            const actionsDiv = document.createElement('div');
+            actionsDiv.className = 'message-actions';
+
+            // Add timestamp
+            const timestampDiv = document.createElement('div');
+            timestampDiv.className = 'message-timestamp';
+            timestampDiv.textContent = formatTime(new Date());
+
+            if (!isUser) {
+                // Check for URL tags in the content
+                if (content.includes('<url>')) {
+                    setInnerHTML(textDiv, content);
+                } else if (content.includes("Which game would you like to play?")) {
+                    const formattedContent = `
+                        <div class="game-options">
+                            <div class="game-title">Which game would you like to play?</div>
+                            <div class="game-list">
+                                <div class="game-item" onclick="selectGame('algebra')">Algebra</div>
+                                <div class="game-item" onclick="selectGame('hangman')">Hangman</div>
+                                <div class="game-item" onclick="selectGame('quiz')">Quiz</div>
+                            </div>
+                        </div>
+                    `;
+                    textDiv.innerHTML = formattedContent;
+                } else {
+                    textDiv.textContent = content;
+                }
+                
+                // Add speaker icon
+                const speakerIcon = document.createElement('button');
+                speakerIcon.className = 'speaker-icon';
+                speakerIcon.innerHTML = '🔊';
+                speakerIcon.title = 'Click to hear this message';
+                speakerIcon.onclick = (e) => {
+                    e.stopPropagation();
+                    const textToSpeak = textDiv.textContent;
+                    speakText(textToSpeak, speakerIcon);
+                };
+                actionsDiv.appendChild(speakerIcon);
+
+                // Add retry button for stories
+                if (content.includes("Once upon a time") || 
+                    content.includes("Here's your story:") || 
+                    content.includes("Let me tell you a story")) {
+                    const retryButton = document.createElement('button');
+                    retryButton.className = 'retry-button';
+                    retryButton.innerHTML = '🔄 New Story';
+                    retryButton.onclick = (e) => {
+                        e.stopPropagation();
+                        retryStory();
+                    };
+                    actionsDiv.appendChild(retryButton);
+                }
+                
+                // Add retry button for music recommendations
+                if (content.includes("matches your vibe") || 
+                    content.includes("Based on your mood")) {
+                    const retryButton = document.createElement('button');
+                    retryButton.className = 'retry-button';
+                    retryButton.innerHTML = '🔄 New Song';
+                    retryButton.onclick = (e) => {
+                        e.stopPropagation();
+                        retryMusic();
+                    };
+                    actionsDiv.appendChild(retryButton);
+                }
+            } else {
+                textDiv.textContent = content;
+            }
+
+            contentDiv.appendChild(textDiv);
+            footerDiv.appendChild(actionsDiv);
+            footerDiv.appendChild(timestampDiv);
+            contentDiv.appendChild(footerDiv);
+            messageDiv.appendChild(contentDiv);
+            messagesContainer.appendChild(messageDiv);
+            
+            // Scroll to bottom after adding message
+            scrollToBottom();
+            
+            // Also scroll to bottom after any images or content loads
+            setTimeout(scrollToBottom, 100);
+        }
+
+        function selectGame(gameChoice) {
+            // Add the user's game selection as a message
+            addMessage(gameChoice, true);
+            
+            // Send the game choice to the server
+            const messageInput = document.getElementById('messageInput');
+            messageInput.value = gameChoice;
+            sendMessage();
+        }
+
+        // Function to send message to Flask backend
+        async function sendMessage(message = null, isRetry = false) {
+            const messageText = message || messageInput.value.trim();
+            if (!messageText) return;
+
+            if (!isRetry) {
+                messageInput.value = '';
+                updateSendButton();
+                addMessage(messageText, true);
+            }
+
+            // Check if message is "game" to show game choices
+            if (messageText.toLowerCase() === 'game') {
+                showGameChoices();
+                return;
+            }
+
+            try {
+                const response = await fetch('/process_chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ message: messageText })
+                });
+
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        window.location.href = '/login';
+                        return;
+                    }
+                    throw new Error('Network response was not ok');
+                }
+
+                const data = await response.json();
+                
+                if (data.game_type) {
+                    handleGameResponse(data);
+                } else {
+                    addMessage(data.response, false);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                addMessage('Sorry, there was an error processing your message. Please try again.', false);
+            }
+            scrollToBottom();
+        }
+
+        function handleGameResponse(data) {
+            if (!data.game_type) {
+                // If no game type, just show the response message
+                addMessage(data.response, false);
+                return;
+            }
+
+            // Add the game introduction message
+            addMessage(data.response, false);
+
+            // Set the current game type
+            currentGame = data.game_type;
+
+            // Create game area if it doesn't exist
+            if (!gameArea) {
+                gameArea = document.createElement('div');
+                gameArea.id = 'gameArea';
+                gameArea.className = 'game-area';
+                chatMessages.appendChild(gameArea);
+            }
+
+            // Update game area content based on game type
+            updateGameArea(data.game_type, data.game_data);
+        }
+
+        function updateGameArea(gameType, gameData, message = null) {
+            // Create game area if it doesn't exist
+            if (!gameArea) {
+                gameArea = document.createElement('div');
+                gameArea.id = 'gameArea';
+                gameArea.className = 'game-area';
+                chatMessages.appendChild(gameArea);
+            }
+
+            // Store current scroll position
+            const wasAtBottom = (chatMessages.scrollHeight - chatMessages.scrollTop) <= (chatMessages.clientHeight + 10);
+
+            const responseHtml = message ? `
+                <div class="game-message ${message.toLowerCase().includes('correct') ? 'correct-answer' : message.toLowerCase().includes('incorrect') ? 'incorrect-answer' : ''}">
+                    ${message}
+                </div>` : '';
+
+            if (gameType === 'hangman') {
+                gameArea.innerHTML = `
+                    <div class="game-container">
+                        <div class="game-info">
+                            <div><strong>Category:</strong> ${gameData.category}</div>
+                            <div><strong>Word:</strong> ${gameData.display}</div>
+                            <div><strong>Guessed Letters:</strong> ${gameData.guessed}</div>
+                            <div><strong>Chances Left:</strong> ${gameData.chances}</div>
+                        </div>
+                        ${responseHtml}
+                        <form class="game-input" onsubmit="submitGameAnswer(event)">
+                            <input type="text" maxlength="1" placeholder="Enter a letter" pattern="[A-Za-z]" required>
+                            <button type="submit">Guess</button>
+                            <button type="button" class="quit-button" onclick="quitGame()">Quit Game</button>
+                        </form>
+                    </div>
+                `;
+            } else if (gameType === 'quiz') {
+                gameArea.innerHTML = `
+                    <div class="game-container">
+                        <div class="quiz-question">${gameData.question}</div>
+                        ${responseHtml}
+                        <form class="game-input" onsubmit="submitGameAnswer(event)">
+                            <input type="text" placeholder="Enter your answer" required>
+                            <button type="submit">Submit Answer</button>
+                            <button type="button" class="quit-button" onclick="quitGame()">Quit Game</button>
+                        </form>
+                    </div>
+                `;
+            } else if (gameType === 'algebra') {
+                gameArea.innerHTML = `
+                    <div class="game-container">
+                        <div class="algebra-problem">${gameData.problem}</div>
+                        ${responseHtml}
+                        <form class="game-input" onsubmit="submitGameAnswer(event)">
+                            <input type="number" step="any" placeholder="Enter your answer" required>
+                            <button type="submit">Submit Answer</button>
+                            <button type="button" class="quit-button" onclick="quitGame()">Quit Game</button>
+                        </form>
+                    </div>
+                `;
+            }
+
+            // Focus on the input field
+            const input = gameArea.querySelector('input');
+            if (input) {
+                input.focus();
+            }
+
+            // Maintain scroll position
+            if (wasAtBottom) {
+                scrollToBottom();
+            }
+        }
+
+        async function handleMessageSend(event) {
+            event.preventDefault();
+            const messageText = messageInput.value.trim();
+            if (!messageText) return;
+            
+            // Clear input and update UI
+            messageInput.value = '';
+            messageInput.style.height = 'auto';
+            updateSendButton();
+            
+            // Add user message to chat
+            addMessage(messageText, true);
+            
+            // Handle game command
+            if (messageText.toLowerCase() === 'game') {
+                showGameChoices();
+                return;
+            }
+            
+            try {
+                const response = await fetch('/process_chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ message: messageText })
+                });
+                
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        window.location.href = '/login';
+                        return;
+                    }
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                // Handle the response
+                if (data.response) {
+                    addMessage(data.response, false);
+                } else if (data.error) {
+                    addMessage(`Error: ${data.error}`, false);
+                }
+                
+                // Handle game data if present
+                if (data.game_type && data.game_data) {
+                    updateGameArea(data.game_type, data.game_data, data.response);
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+                addMessage('Sorry, there was an error processing your message. Please try again.', false);
+            }
+        }
+        
+        // Event listeners for sending messages
+        sendButton.addEventListener('click', handleMessageSend);
+        messageInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                if (!sendButton.disabled) {
+                    handleMessageSend(e);
+                }
+            }
+        });
+
+        // Function to update send button state
+        function updateSendButton() {
+            sendButton.disabled = messageInput.value.trim() === '';
+        }
+
+        // Auto-resize textarea and handle game area
+        messageInput.addEventListener('input', function () {
+            this.style.height = 'auto';
+            this.style.height = `${this.scrollHeight}px`;
+            updateSendButton();
+
+            // Close game area if it exists and no active game
+            if (gameArea && !currentGame) {
+                gameArea.remove();
+                gameArea = null;
+            }
+        });
+
+        // Initial button state
+        updateSendButton();
+
+        // Add logout function
+        function logout() {
+            fetch('/logout')
+                .then(() => {
+                    window.location.href = '/login';
+                })
+                .catch(error => {
+                    console.error('Error logging out:', error);
+                });
+        }
+
+        // Add introduction message when page loads
+        window.addEventListener('DOMContentLoaded', (event) => {
+            setTimeout(() => {
+                const introMessage = "Hi! I'm NAVA, your friendly AI assistant. I'm here to chat, play games, and help you with anything you need. Feel free to start a conversation or try out some fun games!";
+                addMessage(introMessage, false);
+            }, 500);
+        });
+
+        // Function to scroll chat to bottom
+        function scrollToBottom() {
+            const messagesContainer = document.querySelector('.chat-messages');
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // Add event listener for window load to scroll to bottom
+        window.addEventListener('load', scrollToBottom);
+
+        // Add event listener for message input to enable/disable send button
+        messageInput.addEventListener('input', function() {
+            sendButton.disabled = !this.value.trim();
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+        });
+        
+        // Function to scroll chat to bottom
+        function scrollToBottom() {
+            const messagesContainer = document.querySelector('.chat-messages');
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // Add Text-to-Speech functionality
+        let currentSpeech = null;
+        let isSpeaking = false;
+
+        function stopCurrentSpeech() {
+            if (window.speechSynthesis) {
+                window.speechSynthesis.cancel();
+                currentSpeech = null;
+                isSpeaking = false;
+            }
+        }
+
+        function speakText(text, button) {
+            // Cancel any ongoing speech
+            window.speechSynthesis.cancel();
+
+            if (button.classList.contains('speaking')) {
+                // If already speaking, stop and reset button
+                button.classList.remove('speaking');
+                return;
+            }
+
+            // Add speaking class to button
+            button.classList.add('speaking');
+
+            const utterance = new SpeechSynthesisUtterance(text);
+            
+            // When speech ends, reset button
+            utterance.onend = () => {
+                button.classList.remove('speaking');
+            };
+
+            // If speech is interrupted, reset button
+            utterance.onerror = () => {
+                button.classList.remove('speaking');
+            };
+
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // Initialize voice list when voices are loaded
+        if (window.speechSynthesis) {
+            window.speechSynthesis.onvoiceschanged = function() {
+                const voiceSelect = document.getElementById('voiceSelect');
+                if (voiceSelect) {
+                    const voices = window.speechSynthesis.getVoices();
+                    voiceSelect.innerHTML = '';
+                    voices.forEach(voice => {
+                        const option = document.createElement('option');
+                        option.value = voice.name;
+                        option.textContent = `${voice.name} (${voice.lang})`;
+                        voiceSelect.appendChild(option);
+                    });
+                    
+                    // Set selected voice if available
+                    const profileData = JSON.parse(localStorage.getItem('profileData') || '{}');
+                    if (profileData.voice) {
+                        voiceSelect.value = profileData.voice;
+                    }
+                }
+            };
+        }
+
+        // Update the click handler for the user button
+        document.getElementById('userButton').onclick = toggleUserMenu;
+
+        // Load profile data on page load
+        window.addEventListener('DOMContentLoaded', function() {
+            const profileData = JSON.parse(localStorage.getItem('profileData') || '{}');
+            if (profileData.fullName) {
+                document.getElementById('userMenuName').textContent = profileData.fullName;
+                document.getElementById('userAvatar').textContent = profileData.fullName.charAt(0).toUpperCase();
+            }
+            if (profileData.email) {
+                document.getElementById('userMenuEmail').textContent = profileData.email;
+            }
+        });
+
+        function openProfileModal() {
+            document.getElementById('profileModal').style.display = 'block';
+            document.getElementById('modalOverlay').style.display = 'block';
+            // Load existing profile data if available
+            const profileData = JSON.parse(localStorage.getItem('profileData') || '{}');
+            document.getElementById('fullName').value = profileData.fullName || '';
+            document.getElementById('email').value = profileData.email || '';
+            document.getElementById('bio').value = profileData.bio || '';
+            document.getElementById('location').value = profileData.location || '';
+            // Populate voice select
+            const voiceSelect = document.getElementById('voiceSelect');
+            const voices = window.speechSynthesis.getVoices();
+            voices.forEach(voice => {
+                const option = document.createElement('option');
+                option.value = voice.name;
+                option.textContent = `${voice.name} (${voice.lang})`;
+                voiceSelect.appendChild(option);
+            });
+            // Set selected voice if available
+            if (profileData.voice) {
+                voiceSelect.value = profileData.voice;
+            }
+        }
+
+        function closeProfileModal() {
+            document.getElementById('profileModal').style.display = 'none';
+            document.getElementById('modalOverlay').style.display = 'none';
+        }
+
+        function saveProfile(event) {
+            event.preventDefault();
+            const formData = {
+                fullName: document.getElementById('fullName').value,
+                email: document.getElementById('email').value,
+                bio: document.getElementById('bio').value,
+                location: document.getElementById('location').value,
+                voice: document.getElementById('voiceSelect').value
+            };
+            
+            // Save to localStorage
+            localStorage.setItem('profileData', JSON.stringify(formData));
+            
+            // Update UI elements
+            const userAvatar = document.getElementById('userAvatar');
+            const userMenuName = document.getElementById('userMenuName');
+            const userMenuEmail = document.getElementById('userMenuEmail');
+            
+            if (formData.fullName) {
+                userAvatar.textContent = formData.fullName.charAt(0).toUpperCase();
+                userMenuName.textContent = formData.fullName;
+            }
+            if (formData.email) {
+                userMenuEmail.textContent = formData.email;
+            }
+            
+            // Close modal
+            closeProfileModal();
+            
+            // Show success message
+            alert('Profile updated successfully!');
+        }
+
+        // Function to retry music recommendation
+        function retryMusic() {
+            // Send message to request new music recommendation
+            sendMessage("music");
+        }
+
+        function retryStory() {
+            // Send message to request new story
+            addMessage("Let me tell you another story!", false);
+            sendMessage("story");
+        }
+
+        function quitGame() {
+            // Remove game area
+            if (gameArea) {
+                gameArea.remove();
+                gameArea = null;
+            }
+            currentGame = null;
+            
+            // Show game choices with consistent styling
+            const gameChoicesArea = document.createElement('div');
+            gameChoicesArea.className = 'game-options';
+            gameChoicesArea.innerHTML = `
+                <div class="game-container">
+                    <h3 class="game-title">Which game would you like to play?</h3>
+                    <div class="game-list">
+                        <div class="game-item" onclick="selectGame('algebra')">Algebra</div>
+                        <div class="game-item" onclick="selectGame('hangman')">Hangman</div>
+                        <div class="game-item" onclick="selectGame('quiz')">Quiz</div>
+                    </div>
+                </div>
+            `;
+            chatMessages.appendChild(gameChoicesArea);
+            scrollToBottom();
+        }
+
+        function showGameChoices() {
+            clearGameAreas();
+            gameSelectionArea = document.createElement('div');
+            gameSelectionArea.className = 'game-area';
+            gameSelectionArea.innerHTML = `
+                <div class="game-container">
+                    <h3>Choose a game to play:</h3>
+                    <div class="game-choices">
+                        <button onclick="selectGame('algebra')" class="game-choice">Algebra</button>
+                        <button onclick="selectGame('hangman')" class="game-choice">Hangman</button>
+                        <button onclick="selectGame('quiz')" class="game-choice">Quiz</button>
+                    </div>
+                </div>
+            `;
+            chatMessages.appendChild(gameSelectionArea);
+            scrollToBottom();
+        }
+
+        async function selectGame(gameType) {
+            currentGame = gameType;
+            clearGameAreas();
+            
+            try {
+                const response = await fetch('/process_chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ message: gameType })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+
+                const data = await response.json();
+                if (data.game_type && data.game_data) {
+                    updateGameArea(data.game_type, data.game_data, data.response);
+                } else {
+                    addMessage(data.response, false);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                addMessage('Sorry, there was an error starting the game. Please try again.', false);
+            }
+        }
+
+        function updateGameArea(gameType, gameData, message = null) {
+            clearGameAreas();
+            currentGameArea = document.createElement('div');
+            currentGameArea.className = 'game-area';
+            
+            const responseHtml = message ? `
+                <div class="game-message ${message.toLowerCase().includes('correct') ? 'correct-answer' : message.toLowerCase().includes('incorrect') ? 'incorrect-answer' : ''}">
+                    ${message}
+                </div>` : '';
+
+            if (gameType === 'hangman') {
+                currentGameArea.innerHTML = `
+                    <div class="game-container">
+                        <div class="game-info">
+                            <div><strong>Category:</strong> ${gameData.category}</div>
+                            <div><strong>Word:</strong> ${gameData.display}</div>
+                            <div><strong>Guessed Letters:</strong> ${gameData.guessed}</div>
+                            <div><strong>Chances Left:</strong> ${gameData.chances}</div>
+                        </div>
+                        ${responseHtml}
+                        <form class="game-input" onsubmit="submitGameAnswer(event)">
+                            <input type="text" maxlength="1" placeholder="Enter a letter" pattern="[A-Za-z]" required>
+                            <button type="submit">Guess</button>
+                            <button type="button" class="quit-button" onclick="quitGame()">Quit Game</button>
+                        </form>
+                    </div>
+                `;
+            } else if (gameType === 'quiz') {
+                currentGameArea.innerHTML = `
+                    <div class="game-container">
+                        <div class="quiz-question">${gameData.question}</div>
+                        ${responseHtml}
+                        <form class="game-input" onsubmit="submitGameAnswer(event)">
+                            <input type="text" placeholder="Enter your answer" required>
+                            <button type="submit">Submit Answer</button>
+                            <button type="button" class="quit-button" onclick="quitGame()">Quit Game</button>
+                        </form>
+                    </div>
+                `;
+            } else if (gameType === 'algebra') {
+                currentGameArea.innerHTML = `
+                    <div class="game-container">
+                        <div class="algebra-problem">${gameData.problem}</div>
+                        ${responseHtml}
+                        <form class="game-input" onsubmit="submitGameAnswer(event)">
+                            <input type="number" step="any" placeholder="Enter your answer" required>
+                            <button type="submit">Submit Answer</button>
+                            <button type="button" class="quit-button" onclick="quitGame()">Quit Game</button>
+                        </form>
+                    </div>
+                `;
+            }
+
+            chatMessages.appendChild(currentGameArea);
+            
+            // Focus on the input
+            const input = currentGameArea.querySelector('input');
+            if (input) input.focus();
+            scrollToBottom();
+        }
+
+        async function submitGameAnswer(event) {
+            event.preventDefault();
+            if (!currentGame) return;
+
+            const form = event.target;
+            const input = form.querySelector('input');
+            const answer = input.value.trim();
+            
+            if (!answer) return;
+
+            // Clear input
+            input.value = '';
+
+            try {
+                const response = await fetch('/game/answer', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        game_type: currentGame,
+                        answer: answer
+                    })
+                });
+
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        window.location.href = '/login';
+                        return;
+                    }
+                    throw new Error('Network response was not ok');
+                }
+
+                const data = await response.json();
+                
+                if (data.error) {
+                    addMessage(data.error, false);
+                    return;
+                }
+                
+                if (data.game_over) {
+                    addMessage(data.message || 'Game Over!', false);
+                    clearGameAreas();
+                    currentGame = null;
+                } else {
+                    // For hangman, ensure we have all required fields
+                    if (currentGame === 'hangman') {
+                        if (!data.display || !data.guessed || !data.chances) {
+                            console.error('Missing required hangman data:', data);
+                            addMessage('Error: Missing game data. Please try again.', false);
+                            return;
+                        }
+                        updateGameArea(currentGame, {
+                            category: data.category,
+                            display: data.display,
+                            guessed: data.guessed,
+                            chances: data.chances
+                        }, data.message);
+                    } else {
+                        updateGameArea(currentGame, data.game_data, data.message);
+                    }
+                }
+                
+                scrollToBottom();
+            } catch (error) {
+                console.error('Error:', error);
+                addMessage('Error processing your answer. Please try again.', false);
+            }
+        }
+
+        function quitGame() {
+            clearGameAreas();
+            currentGame = null;
+            addMessage('Game ended. Choose a new game to play!', false);
+            showGameChoices();
+        }
+
+        function clearGameAreas() {
+            if (currentGameArea) {
+                currentGameArea.remove();
+                currentGameArea = null;
+            }
+            if (gameSelectionArea) {
+                gameSelectionArea.remove();
+                gameSelectionArea = null;
+            }
+        }
+    </script>
+</body>
+</html>
