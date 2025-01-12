@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, jsonify, url_for, redirect, session
+import nltk_setup
 from interf import chatbot_response
 from game import AlgebraGame, HangmanGame, QuizGame
 from inference import generate, model as story_model
