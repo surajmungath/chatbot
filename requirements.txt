@@ -13,5 +13,8 @@ tensorflow
 tensorflow-cpu
 scikit-learn
 nltk
+pyttsx3
+espeak
+python-espeak
 pywebview==4.3.3
 pyinstaller==6.3.0

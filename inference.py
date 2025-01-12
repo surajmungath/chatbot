@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import numpy as np
 import pickle
-import pyttsx3
+import os
 import warnings
 warnings.filterwarnings("ignore", category=FutureWarning)
 
