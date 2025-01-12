@@ -92,20 +92,7 @@ def generate(model, start_str, predict_len=300, temperature=0.7):
         print(f"Error in story generation: {str(e)}")
         return None
 
-# Generate a story
-# start_string = input("Enter the start of your story: ")
-# generated_story = generate(model, start_string, predict_len=500)
-# print("Generated Story:")
-# print(generated_story)
-# engine = pyttsx3.init()
-# voices = engine.getProperty('voices')
-#      # Set the voice property 0 for male voice 1for female voice
-# engine.setProperty('voice', voices[1].id)
-# engine.setProperty('rate', 160)  # Speed of speech
-# engine.setProperty('volume', 1.2)  # Volume (0.0 to 1.0)
-
-# Convert text to speech
-# engine.say(generated_story)
-
-# Play the speech
-# engine.runAndWait()
+if __name__ == "__main__":
+    start_string = "Once upon a time"
+    generated_story = generate(model, start_string)
+    print(generated_story)
