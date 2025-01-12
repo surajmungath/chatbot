@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, url_for, redirect, session
+from flask import Flask, render_template, request, jsonify, url_for, redirect, session, send_from_directory
 import nltk_setup
 from interf import chatbot_response
 from game import AlgebraGame, HangmanGame, QuizGame
@@ -10,8 +10,16 @@ from contextlib import redirect_stdout
 import os
 import random
 
-app = Flask(__name__, template_folder='templates', static_folder='static')
+# Initialize Flask app with absolute paths
+template_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), 'templates'))
+static_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), 'static'))
+app = Flask(__name__, template_folder=template_dir, static_folder=static_dir)
 app.secret_key = os.urandom(24)  # for session management
+
+# Print directories for debugging
+print(f"Template directory: {template_dir}")
+print(f"Static directory: {static_dir}")
+print(f"Available templates: {os.listdir(template_dir)}")
 
 # Game state storage
 game_states = {}
@@ -36,7 +44,7 @@ def login():
 
 @app.route('/signup')
 def signup():
-    return render_template('sign.html')  
+    return render_template('sing.html')
 
 @app.route('/chat')
 def chat_page():
@@ -380,6 +388,37 @@ def forgot():
 @app.route('/health')
 def health_check():
     return jsonify({"status": "healthy"}), 200
+
+@app.route('/debug/routes')
+def list_routes():
+    """List all registered routes for debugging"""
+    routes = []
+    for rule in app.url_map.iter_rules():
+        routes.append({
+            'endpoint': rule.endpoint,
+            'methods': list(rule.methods),
+            'path': str(rule)
+        })
+    return jsonify(routes)
+
+@app.route('/debug/templates')
+def list_templates():
+    """List all available templates for debugging"""
+    templates = os.listdir(template_dir)
+    return jsonify({
+        'template_dir': template_dir,
+        'templates': templates
+    })
+
+@app.route('/debug/config')
+def show_config():
+    """Show current configuration for debugging"""
+    return jsonify({
+        'template_folder': app.template_folder,
+        'static_folder': app.static_folder,
+        'debug': app.debug,
+        'testing': app.testing
+    })
 
 # Error handlers
 @app.errorhandler(404)

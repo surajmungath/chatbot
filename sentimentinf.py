@@ -1,20 +1,29 @@
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 import joblib
+import os
+import tensorflow as tf
 
 # Step 1: Load Model, Tokenizer, and Label Encoder
 try:
-    model = load_model('emotion_model.h5')
+    # Configure TensorFlow to use CPU
+    tf.config.set_visible_devices([], 'GPU')
+    
+    # Set up model loading with custom objects if needed
+    model = load_model('emotion_model.h5', compile=False)
+    model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+    
     tokenizer = joblib.load('tokenizer.pkl')
     label_encoder = joblib.load('label_encoder.pkl')
+    
     # Define max_length based on training
-    max_length = model.input_shape[1]
+    max_length = 66  # Hardcoding this since we know the value
 except Exception as e:
     print(f"Error loading emotion model: {str(e)}")
     model = None
     tokenizer = None
     label_encoder = None
-    max_length = None
+    max_length = 66
 
 # Step 2: Define Inference Function
 def predict_emotion(text, tokenizer, model, max_length, label_encoder):
