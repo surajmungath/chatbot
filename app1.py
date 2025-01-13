@@ -1,3 +1,16 @@
+import os
+import sys
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.DEBUG, 
+                    filename='flask_app.log', 
+                    format='%(asctime)s - %(levelname)s - %(message)s')
+
+# Ensure the current directory is in the Python path
+current_dir = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, current_dir)
+
 from flask import Flask, render_template, request, jsonify, url_for, redirect, session, send_from_directory
 import nltk_setup
 from interf import chatbot_response
@@ -7,32 +20,28 @@ from sentimentinf import predict_emotion, show_song, tokenizer, model as emotion
 import tensorflow as tf
 import io
 from contextlib import redirect_stdout
-import os
 import random
 
-# Initialize Flask app with absolute paths
-root_dir = os.path.dirname(os.path.abspath(__file__))
-template_dir = os.path.join(root_dir, 'templates')
-static_dir = os.path.join(root_dir, 'static')
-
-# Print directories for debugging
-print(f"Root directory: {root_dir}")
-print(f"Template directory: {template_dir}")
-print(f"Static directory: {static_dir}")
-
-# List available templates
-try:
-    templates = os.listdir(template_dir)
-    print(f"Available templates: {templates}")
-except Exception as e:
-    print(f"Error listing templates: {str(e)}")
-    templates = []
-
+# Initialize Flask app
 app = Flask(__name__)
+app.secret_key = os.urandom(24)  # for session management
+
+# Configure template and static folders
+template_dir = os.path.join(current_dir, 'templates')
+static_dir = os.path.join(current_dir, 'static')
 app.template_folder = template_dir
 app.static_folder = static_dir
-app.static_url_path = '/static'
-app.secret_key = os.urandom(24)
+
+# Logging directory information
+logging.info(f"Current Directory: {current_dir}")
+logging.info(f"Template Directory: {template_dir}")
+logging.info(f"Static Directory: {static_dir}")
+
+# Try to list templates and static files
+try:
+    logging.info(f"Templates: {os.listdir(template_dir)}")
+except Exception as e:
+    logging.error(f"Error listing templates: {str(e)}")
 
 # Game state storage
 game_states = {}
@@ -50,36 +59,34 @@ def index():
     try:
         return render_template('index.html')
     except Exception as e:
-        print(f"Error rendering index: {str(e)}")
-        return str(e), 500
+        logging.error(f"Error rendering index: {str(e)}")
+        return f"Error: {str(e)}", 500
 
 @app.route('/login')
 def login():
     try:
         if 'user' in session:
             return redirect(url_for('chat_page'))
-        print("Rendering login.html from:", os.path.join(template_dir, 'login.html'))
         return render_template('login.html')
     except Exception as e:
-        print(f"Error rendering login: {str(e)}")
-        return str(e), 500
+        logging.error(f"Error rendering login: {str(e)}")
+        return f"Error: {str(e)}", 500
 
 @app.route('/signup')
 def signup():
     try:
-        print("Rendering sing.html from:", os.path.join(template_dir, 'sing.html'))
         return render_template('sing.html')
     except Exception as e:
-        print(f"Error rendering signup: {str(e)}")
-        return str(e), 500
+        logging.error(f"Error rendering signup: {str(e)}")
+        return f"Error: {str(e)}", 500
 
 @app.route('/chat')
 def chat_page():
     try:
         return render_template('chat.html')
     except Exception as e:
-        print(f"Error rendering chat: {str(e)}")
-        return str(e), 500
+        logging.error(f"Error rendering chat: {str(e)}")
+        return f"Error: {str(e)}", 500
 
 @app.route('/chat.html')
 def chat_html_redirect():
@@ -90,8 +97,8 @@ def serve_static(filename):
     try:
         return send_from_directory(static_dir, filename)
     except Exception as e:
-        print(f"Error serving static file {filename}: {str(e)}")
-        return str(e), 404
+        logging.error(f"Error serving static file {filename}: {str(e)}")
+        return f"Error: {str(e)}", 404
 
 @app.route('/process_chat', methods=['POST'])
 def process_chat():
@@ -125,7 +132,7 @@ def process_chat():
             try:
                 return handle_music_request(user_message)
             except Exception as e:
-                app.logger.error(f"Error in music request: {str(e)}")
+                logging.error(f"Error in music request: {str(e)}")
                 return jsonify({"error": "Unable to process music request. Please try again."}), 500
         
         # Game intent
@@ -155,10 +162,10 @@ def process_chat():
                 return jsonify({"response": response.get("text", ""), "suggestions": response.get("suggestions", [])})
             
     except ValueError as e:
-        app.logger.error(f"Value error in chat endpoint: {str(e)}")
+        logging.error(f"Value error in chat endpoint: {str(e)}")
         return jsonify({"error": "Invalid input format"}), 400
     except Exception as e:
-        app.logger.error(f"Error in chat endpoint: {str(e)}")
+        logging.error(f"Error in chat endpoint: {str(e)}")
         return jsonify({"error": "An unexpected error occurred. Please try again."}), 500
 
 @app.route('/game/answer', methods=['POST'])
@@ -305,7 +312,7 @@ def handle_hangman_guess(user_id, guess):
         
         return jsonify(result)
     except Exception as e:
-        app.logger.error(f"Error in hangman guess: {str(e)}")
+        logging.error(f"Error in hangman guess: {str(e)}")
         return jsonify({"error": "Error processing your answer. Please try again."}), 500
 
 def handle_quiz_answer(user_id, answer):
@@ -346,7 +353,7 @@ def handle_story_request(story_type):
         story = generate(story_model, prompt)
         return jsonify({"response": story})
     except Exception as e:
-        app.logger.error(f"Error generating story: {str(e)}")
+        logging.error(f"Error generating story: {str(e)}")
         return jsonify({"response": "I'm having trouble generating a story right now. Please try again later."})
 
 def get_music_recommendation():
@@ -380,7 +387,7 @@ def handle_music_request(mood):
             "response": f"Based on your mood {emotion},\n\n here's a song for you: <url>{url}</url>"
         })
     except Exception as e:
-        app.logger.error(f"Error processing music request: {str(e)}")
+        logging.error(f"Error processing music request: {str(e)}")
         return jsonify({"response": "I'm having trouble processing your music request. Please try again later."})
 
 @app.route('/update_profile', methods=['POST'])
@@ -460,21 +467,13 @@ def show_config():
 # Error handlers
 @app.errorhandler(404)
 def page_not_found(e):
-    print(f"404 error: {str(e)}")
-    try:
-        return render_template('index.html'), 404
-    except Exception as err:
-        print(f"Error rendering 404 page: {str(err)}")
-        return f"Page not found: {str(e)}", 404
+    logging.error(f"404 error: {str(e)}")
+    return render_template('index.html'), 404
 
 @app.errorhandler(500)
 def internal_server_error(e):
-    print(f"500 error: {str(e)}")
-    try:
-        return render_template('index.html'), 500
-    except Exception as err:
-        print(f"Error rendering 500 page: {str(err)}")
-        return f"Internal server error: {str(e)}", 500
+    logging.error(f"500 error: {str(e)}")
+    return render_template('index.html'), 500
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
