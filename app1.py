@@ -15,22 +15,24 @@ root_dir = os.path.dirname(os.path.abspath(__file__))
 template_dir = os.path.join(root_dir, 'templates')
 static_dir = os.path.join(root_dir, 'static')
 
-app = Flask(__name__, 
-           template_folder=template_dir,
-           static_folder=static_dir,
-           static_url_path='/static')
-
-app.secret_key = os.urandom(24)  # for session management
-
 # Print directories for debugging
 print(f"Root directory: {root_dir}")
 print(f"Template directory: {template_dir}")
 print(f"Static directory: {static_dir}")
+
+# List available templates
 try:
-    print(f"Available templates: {os.listdir(template_dir)}")
-    print(f"Available static files: {os.listdir(static_dir)}")
+    templates = os.listdir(template_dir)
+    print(f"Available templates: {templates}")
 except Exception as e:
-    print(f"Error listing directories: {str(e)}")
+    print(f"Error listing templates: {str(e)}")
+    templates = []
+
+app = Flask(__name__)
+app.template_folder = template_dir
+app.static_folder = static_dir
+app.static_url_path = '/static'
+app.secret_key = os.urandom(24)
 
 # Game state storage
 game_states = {}
@@ -46,7 +48,6 @@ def capture_output(func, *args, **kwargs):
 @app.route('/')
 def index():
     try:
-        # Always redirect to index.html first
         return render_template('index.html')
     except Exception as e:
         print(f"Error rendering index: {str(e)}")
@@ -57,6 +58,7 @@ def login():
     try:
         if 'user' in session:
             return redirect(url_for('chat_page'))
+        print("Rendering login.html from:", os.path.join(template_dir, 'login.html'))
         return render_template('login.html')
     except Exception as e:
         print(f"Error rendering login: {str(e)}")
@@ -65,15 +67,19 @@ def login():
 @app.route('/signup')
 def signup():
     try:
-        return render_template('sing.html')  # Using sing.html as requested
+        print("Rendering sing.html from:", os.path.join(template_dir, 'sing.html'))
+        return render_template('sing.html')
     except Exception as e:
         print(f"Error rendering signup: {str(e)}")
         return str(e), 500
 
 @app.route('/chat')
 def chat_page():
-    # Remove session check to allow direct access to chat page
-    return render_template('chat.html')
+    try:
+        return render_template('chat.html')
+    except Exception as e:
+        print(f"Error rendering chat: {str(e)}")
+        return str(e), 500
 
 @app.route('/chat.html')
 def chat_html_redirect():
