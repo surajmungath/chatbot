@@ -46,6 +46,7 @@ def capture_output(func, *args, **kwargs):
 @app.route('/')
 def index():
     try:
+        # Always redirect to index.html first
         return render_template('index.html')
     except Exception as e:
         print(f"Error rendering index: {str(e)}")
@@ -64,10 +65,19 @@ def login():
 @app.route('/signup')
 def signup():
     try:
-        return render_template('sing.html')  
+        return render_template('sing.html')  # Using sing.html as requested
     except Exception as e:
         print(f"Error rendering signup: {str(e)}")
         return str(e), 500
+
+@app.route('/chat')
+def chat_page():
+    # Remove session check to allow direct access to chat page
+    return render_template('chat.html')
+
+@app.route('/chat.html')
+def chat_html_redirect():
+    return redirect(url_for('chat_page'))
 
 @app.route('/static/<path:filename>')
 def serve_static(filename):
@@ -76,16 +86,6 @@ def serve_static(filename):
     except Exception as e:
         print(f"Error serving static file {filename}: {str(e)}")
         return str(e), 404
-
-@app.route('/chat')
-def chat_page():
-    if 'user' not in session:
-        return redirect(url_for('login'))
-    return render_template('chat.html')
-
-@app.route('/chat.html')
-def chat_html_redirect():
-    return redirect(url_for('chat_page'))
 
 @app.route('/process_chat', methods=['POST'])
 def process_chat():
