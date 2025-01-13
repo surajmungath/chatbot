@@ -11,15 +11,26 @@ import os
 import random
 
 # Initialize Flask app with absolute paths
-template_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), 'templates'))
-static_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), 'static'))
-app = Flask(__name__, template_folder=template_dir, static_folder=static_dir)
+root_dir = os.path.dirname(os.path.abspath(__file__))
+template_dir = os.path.join(root_dir, 'templates')
+static_dir = os.path.join(root_dir, 'static')
+
+app = Flask(__name__, 
+           template_folder=template_dir,
+           static_folder=static_dir,
+           static_url_path='/static')
+
 app.secret_key = os.urandom(24)  # for session management
 
 # Print directories for debugging
+print(f"Root directory: {root_dir}")
 print(f"Template directory: {template_dir}")
 print(f"Static directory: {static_dir}")
-print(f"Available templates: {os.listdir(template_dir)}")
+try:
+    print(f"Available templates: {os.listdir(template_dir)}")
+    print(f"Available static files: {os.listdir(static_dir)}")
+except Exception as e:
+    print(f"Error listing directories: {str(e)}")
 
 # Game state storage
 game_states = {}
@@ -34,17 +45,37 @@ def capture_output(func, *args, **kwargs):
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    try:
+        return render_template('index.html')
+    except Exception as e:
+        print(f"Error rendering index: {str(e)}")
+        return str(e), 500
 
 @app.route('/login')
 def login():
-    if 'user' in session:
-        return redirect(url_for('chat_page'))
-    return render_template('login.html')
+    try:
+        if 'user' in session:
+            return redirect(url_for('chat_page'))
+        return render_template('login.html')
+    except Exception as e:
+        print(f"Error rendering login: {str(e)}")
+        return str(e), 500
 
 @app.route('/signup')
 def signup():
-    return render_template('sing.html')
+    try:
+        return render_template('sing.html')  
+    except Exception as e:
+        print(f"Error rendering signup: {str(e)}")
+        return str(e), 500
+
+@app.route('/static/<path:filename>')
+def serve_static(filename):
+    try:
+        return send_from_directory(static_dir, filename)
+    except Exception as e:
+        print(f"Error serving static file {filename}: {str(e)}")
+        return str(e), 404
 
 @app.route('/chat')
 def chat_page():
@@ -423,11 +454,21 @@ def show_config():
 # Error handlers
 @app.errorhandler(404)
 def page_not_found(e):
-    return render_template('index.html'), 404
+    print(f"404 error: {str(e)}")
+    try:
+        return render_template('index.html'), 404
+    except Exception as err:
+        print(f"Error rendering 404 page: {str(err)}")
+        return f"Page not found: {str(e)}", 404
 
 @app.errorhandler(500)
 def internal_server_error(e):
-    return render_template('index.html'), 500
+    print(f"500 error: {str(e)}")
+    try:
+        return render_template('index.html'), 500
+    except Exception as err:
+        print(f"Error rendering 500 page: {str(err)}")
+        return f"Internal server error: {str(e)}", 500
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
